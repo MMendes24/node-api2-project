@@ -1,7 +1,6 @@
 // ANTIQUATED IMPORT METHODS TO PRACTICE //
 const express = require('express')
 const Posts = require('../data/db') // importing the helper functions from the database
-const Knex = require('knex')
 const router = express.Router() // router must be imported out of the box from the Express API to work
     
 
