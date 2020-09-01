@@ -1,7 +1,9 @@
 // ANTIQUATED IMPORT METHODS TO PRACTICE //
 const express = require('express')
 const Posts = require('../data/db') // importing the helper functions from the database
+const Knex = require('knex')
 const router = express.Router() // router must be imported out of the box from the Express API to work
+    
 
 //SETTING UP THE ROUTER//
 
@@ -44,6 +46,7 @@ router.get('/:id/comments', (req, res) => {
 })
 
 //POST REQUESTS //
+
 // router.post('/', (req, res) => {
 //     const newPost = req.body
 //     Posts.insert(newPost)
@@ -58,6 +61,7 @@ router.get('/:id/comments', (req, res) => {
 //         res.status(500).json({ error: "There was an error while saving the post to the database" })
 //     })
 // })
+
 router.post('/', (req, res) => {
     if (!req.body.title || !req.body.contents) {
         res.status(400).json({ errorMessage: "Please provide title and contents for the post." })
@@ -72,6 +76,63 @@ router.post('/', (req, res) => {
     }
 })
 
+router.post('/:id/comments', (req, res) => {
+    const comment = req.body
+    const id = Number(req.params.id)
+    console.log(req.body.post_id)
+    console.log(id)
+
+    if (!req.body.text) {
+        res.status(400).json({ errorMessage: "Please provide text for the comment." })
+    } else if (id === comment.post_id){    
+        Posts.insertComment(comment)
+        .then(thenRes => {
+            res.status(201).json(comment)
+        })
+        .catch(err => {
+            res.status(500).json({ error: "There was an error while saving the comment to the database" })
+        })
+    } else {
+        res.status(404).json({ message: "The post with the specified ID does not exist." })
+    }
+})
+
 //PUT REQUEST
+router.put('/:id', (req, res) => {
+    const id = Number(req.params.id)
+    const newPost = req.body
+    console.log(Posts)
+
+    if(!req.body.title || !req.body.contents) {
+        res.status(400).json({ errorMessage: "Please provide title and contents for the post." })
+    } else if (id > 0) {
+        Posts.update(id, newPost)
+        .then(thenRes => {
+            res.status(200).json(newPost)
+        })
+        .catch(err => {
+            res.status(500).json({ error: "The post information could not be modified." })
+        })
+    } else {
+        res.status(404).json({ message: "The post with the specified ID does not exist." })
+    }
+})
+
+// DELETE REQUEST //
+router.delete('/:id', (req, res) => {
+    const id = Number(req.params.id)
+    if (id > 0) {
+        Posts.remove(id)
+        .then(thenRes => {
+            res.status(200).json(req.body)
+        })
+        .catch(err => {
+            res.status(500).json({ error: "The post could not be removed" })
+        })
+    } else {
+        res.status(404).json({ message: "The post with the specified ID does not exist." })
+    }
+})
+
 
 module.exports = router
